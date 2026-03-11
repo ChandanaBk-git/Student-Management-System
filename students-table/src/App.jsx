@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import StudentForm from "./components/StudentForm";
 import StudentTable from "./components/StudentTable";
-import axios from "axios";
+import studentsData from "./data/students.json";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "./App.css";
@@ -12,90 +12,51 @@ function App() {
   const [editingStudent, setEditingStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API = "http://localhost:5000/students";
-
-  // READ (GET students)
+  // READ (Load local JSON)
 
   useEffect(() => {
 
     setTimeout(() => {
-
-      axios.get(API)
-        .then((res) => {
-          setStudents(res.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error fetching students:", err);
-          setLoading(false);
-        });
-
+      setStudents(studentsData);
+      setLoading(false);
     }, 1200);
 
   }, []);
 
-  // CREATE (Add Student)
+  // CREATE
 
-  const addStudent = async (student) => {
+  const addStudent = (student) => {
 
-    try {
+    const newStudent = {
+      id: Date.now(),
+      ...student
+    };
 
-      const res = await axios.post(API, student);
-
-      setStudents([...students, res.data]);
-
-    } catch (error) {
-
-      console.error("Error adding student:", error);
-
-    }
-
+    setStudents([...students, newStudent]);
   };
 
   // UPDATE
 
-  const updateStudent = async (student) => {
+  const updateStudent = (student) => {
 
-    try {
+    setStudents(
+      students.map((s) =>
+        s.id === student.id ? student : s
+      )
+    );
 
-      await axios.put(`${API}/${student.id}`, student);
-
-      setStudents(
-        students.map((s) =>
-          s.id === student.id ? student : s
-        )
-      );
-
-      setEditingStudent(null);
-
-    } catch (error) {
-
-      console.error("Error updating student:", error);
-
-    }
-
+    setEditingStudent(null);
   };
 
   // DELETE
 
-  const deleteStudent = async (id) => {
+  const deleteStudent = (id) => {
 
     if (!window.confirm("Delete this student?")) return;
 
-    try {
-
-      await axios.delete(`${API}/${id}`);
-
-      setStudents(
-        students.filter((s) => s.id !== id)
-      );
-
-    } catch (error) {
-
-      console.error("Error deleting student:", error);
-
-    }
-
+    setStudents(
+      students.filter((s) => s.id !== id)
+    );
   };
 
   // EDIT
@@ -126,8 +87,6 @@ function App() {
     saveAs(file, "students.xlsx");
 
   };
-
-  // LOADING UI
 
   if (loading) {
 
