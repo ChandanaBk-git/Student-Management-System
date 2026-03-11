@@ -2,111 +2,82 @@ import { useState, useEffect } from "react";
 
 function StudentForm({ addStudent, updateStudent, editingStudent }) {
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    age: ""
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [age, setAge] = useState("");
 
   useEffect(() => {
 
     if (editingStudent) {
-      setForm(editingStudent);
+      setName(editingStudent.name);
+      setEmail(editingStudent.email);
+      setAge(editingStudent.age);
     }
 
   }, [editingStudent]);
-
-  const handleChange = (e) => {
-
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
-
-  };
 
   const handleSubmit = (e) => {
 
     e.preventDefault();
 
-    if (!form.name || !form.email || !form.age) {
+    if (!name || !email || !age) {
       alert("All fields required");
       return;
     }
 
-    const emailRegex = /\S+@\S+\.\S+/;
-
-    if (!emailRegex.test(form.email)) {
-      alert("Invalid Email");
-      return;
-    }
+    const student = {
+      name,
+      email,
+      age
+    };
 
     if (editingStudent) {
-
-      updateStudent(form);
-
+      updateStudent({ ...student, id: editingStudent.id });
     } else {
-
-      addStudent(form);
-
+      addStudent(student);
     }
 
-    setForm({
-      name: "",
-      email: "",
-      age: ""
-    });
+    setName("");
+    setEmail("");
+    setAge("");
 
   };
 
- return (
-  <div className="form-card">
+  return (
 
-    <h2>Student Details</h2>
+    <form className="student-form" onSubmit={handleSubmit}>
 
-    <form className="form" onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Enter student name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
-      <div className="form-group">
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter student name"
-          value={form.name}
-          onChange={handleChange}
-        />
-      </div>
+      <input
+        type="email"
+        placeholder="Enter email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      <div className="form-group">
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter email"
-          value={form.email}
-          onChange={handleChange}
-        />
-      </div>
+      <input
+        type="number"
+        placeholder="Enter age"
+        value={age}
+        onChange={(e) => setAge(e.target.value)}
+      />
 
-      <div className="form-group">
-        <label>Age</label>
-        <input
-          type="number"
-          name="age"
-          placeholder="Enter age"
-          value={form.age}
-          onChange={handleChange}
-        />
-      </div>
+      <button type="submit">
 
-      <button type="submit" className="add-btn">
         {editingStudent ? "Update Student" : "Add Student"}
+
       </button>
 
     </form>
 
-  </div>
-);
+  );
+
 }
 
 export default StudentForm;
