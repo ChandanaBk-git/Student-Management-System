@@ -12,18 +12,29 @@ function App() {
   const [editingStudent, setEditingStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // READ (Load local JSON)
+  // Load from LocalStorage
 
   useEffect(() => {
 
-    setTimeout(() => {
+    const savedStudents = localStorage.getItem("students");
+
+    if (savedStudents) {
+      setStudents(JSON.parse(savedStudents));
+    } else {
       setStudents(studentsData);
-      setLoading(false);
-    }, 1200);
+    }
+
+    setLoading(false);
 
   }, []);
 
-  // CREATE
+  // Save automatically
+
+  useEffect(() => {
+    localStorage.setItem("students", JSON.stringify(students));
+  }, [students]);
+
+  // ADD
 
   const addStudent = (student) => {
 
@@ -33,6 +44,7 @@ function App() {
     };
 
     setStudents([...students, newStudent]);
+
   };
 
   // UPDATE
@@ -46,6 +58,7 @@ function App() {
     );
 
     setEditingStudent(null);
+
   };
 
   // DELETE
@@ -57,6 +70,7 @@ function App() {
     setStudents(
       students.filter((s) => s.id !== id)
     );
+
   };
 
   // EDIT
@@ -70,7 +84,6 @@ function App() {
   const exportExcel = () => {
 
     const worksheet = XLSX.utils.json_to_sheet(students);
-
     const workbook = XLSX.utils.book_new();
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
@@ -89,13 +102,7 @@ function App() {
   };
 
   if (loading) {
-
-    return (
-      <div className="loading">
-        Loading Students...
-      </div>
-    );
-
+    return <div className="loading">Loading Students...</div>;
   }
 
   return (
@@ -113,14 +120,9 @@ function App() {
       />
 
       <div className="table-actions">
-
-        <button
-          onClick={exportExcel}
-          className="download-btn"
-        >
+        <button onClick={exportExcel} className="download-btn">
           Download Excel
         </button>
-
       </div>
 
       <StudentTable
